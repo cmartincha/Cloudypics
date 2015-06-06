@@ -1,38 +1,63 @@
 package es.cmartincha.cloudypics;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends FragmentActivity implements LoginListener {
+    Bundle mSavedInstanceState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mSavedInstanceState = savedInstanceState;
+        changeToLoginFragment();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_login, menu);
-        return true;
-    }
+    public void changeToLoginFragment() {
+        if (findViewById(R.id.fragment_container) != null) {
+            LoginFragment loginFragment = new LoginFragment();
+            FragmentManager fragmentManager = getSupportFragmentManager();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+            if (fragmentManager.findFragmentById(R.id.fragment_container) == null) {
+                if (mSavedInstanceState != null) {
+                    return;
+                }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragment_container, loginFragment).commit();
+            } else {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, loginFragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    @Override
+    public void changeToSignInFragment() {
+        if (findViewById(R.id.fragment_container) != null) {
+            SignInFragment signInFragment = new SignInFragment();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+
+            if (fragmentManager.findFragmentById(R.id.fragment_container) == null) {
+                if (mSavedInstanceState != null) {
+                    return;
+                }
+
+                fragmentManager.beginTransaction()
+                        .add(R.id.fragment_container, signInFragment).commit();
+            } else {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, signInFragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
+        }
     }
 }

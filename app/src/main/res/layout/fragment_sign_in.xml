@@ -1,0 +1,60 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context="es.cmartincha.cloudypics.SignInFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/txtSignInUserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/user_name"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/txtSignInPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtSignInUserName"
+            android:hint="@string/password"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/txtSignInKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtSignInPassword"
+            android:hint="@string/key"
+            android:inputType="text" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtSignInKey">
+
+            <Button
+                android:id="@+id/btnSignInBack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/back" />
+
+            <Button
+                android:id="@+id/btnSignInEnter"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/enter" />
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
+</FrameLayout>
