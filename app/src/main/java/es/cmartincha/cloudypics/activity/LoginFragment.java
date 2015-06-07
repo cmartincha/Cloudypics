@@ -1,4 +1,4 @@
-package es.cmartincha.cloudypics;
+package es.cmartincha.cloudypics.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,18 +8,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-public class SignInFragment extends Fragment implements View.OnClickListener {
+import es.cmartincha.cloudypics.R;
 
-    protected Button btnSignInBack;
+public class LoginFragment extends Fragment implements View.OnClickListener {
+
+    protected Button btnLoginRegister;
     protected LoginListener mLoginListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        btnSignInBack = (Button) view.findViewById(R.id.btnSignInBack);
-        btnSignInBack.setOnClickListener(this);
+        btnLoginRegister = (Button) view.findViewById(R.id.btnLoginRegister);
+        btnLoginRegister.setOnClickListener(this);
 
         return view;
     }
@@ -39,10 +41,9 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btnSignInBack:
-                mLoginListener.changeToLoginFragment();
+            case R.id.btnLoginRegister:
+                mLoginListener.changeToSignInFragment();
                 break;
         }
     }
-
 }
