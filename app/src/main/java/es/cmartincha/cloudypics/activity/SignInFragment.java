@@ -16,8 +16,8 @@ import android.widget.Toast;
 
 import es.cmartincha.cloudypics.R;
 import es.cmartincha.cloudypics.lib.LoginResponse;
-import es.cmartincha.cloudypics.lib.LoginToken;
 import es.cmartincha.cloudypics.lib.Server;
+import es.cmartincha.cloudypics.lib.UserLogin;
 
 public class SignInFragment extends Fragment implements View.OnClickListener, TextView.OnEditorActionListener {
 
@@ -105,8 +105,11 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         @Override
         protected void onPostExecute(LoginResponse response) {
             if (response.isOk()) {
-                LoginToken loginToken = new LoginToken(getActivity());
-                loginToken.saveToken(response.getToken());
+                UserLogin userLogin = new UserLogin(getActivity());
+
+                userLogin.setToken(response.getToken());
+                userLogin.setUserName(txtSignInUserName.getText().toString());
+                userLogin.setPassword(txtSignInPassword.getText().toString());
 
                 mLoginListener.goToPicturesActivity();
             } else {

@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
 import es.cmartincha.cloudypics.R;
-import es.cmartincha.cloudypics.lib.LoginToken;
+import es.cmartincha.cloudypics.lib.UserLogin;
 
 
 public class LoginActivity extends AppCompatActivity implements LoginListener {
@@ -19,9 +19,9 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         setContentView(R.layout.activity_login);
 
         mSavedInstanceState = savedInstanceState;
-        LoginToken loginToken = new LoginToken(this);
+        UserLogin userLogin = new UserLogin(this);
 
-        if (loginToken.hasToken()) {
+        if (userLogin.hasToken()) {
             goToPicturesActivity();
         } else {
             changeToLoginFragment();
