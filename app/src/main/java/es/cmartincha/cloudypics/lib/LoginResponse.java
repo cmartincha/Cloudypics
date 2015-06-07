@@ -6,8 +6,8 @@ import org.json.JSONObject;
 /**
  * Created by Carlos on 07/06/2015.
  */
-public class SignInResponse extends JSONObject {
-    public SignInResponse(String json) throws JSONException {
+public class LoginResponse extends JSONObject {
+    public LoginResponse(String json) throws JSONException {
         super(json);
     }
 

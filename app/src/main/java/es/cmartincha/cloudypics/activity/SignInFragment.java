@@ -15,9 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import es.cmartincha.cloudypics.R;
+import es.cmartincha.cloudypics.lib.LoginResponse;
 import es.cmartincha.cloudypics.lib.LoginToken;
 import es.cmartincha.cloudypics.lib.Server;
-import es.cmartincha.cloudypics.lib.SignInResponse;
 
 public class SignInFragment extends Fragment implements View.OnClickListener, TextView.OnEditorActionListener {
 
@@ -77,7 +77,8 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-            new SignInTask().execute();
+            new SignInTask()
+                    .execute();
 
             return true;
         }
@@ -85,15 +86,14 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         return false;
     }
 
-    private class SignInTask extends AsyncTask<Void, Void, SignInResponse> {
+    private class SignInTask extends AsyncTask<Void, Void, LoginResponse> {
 
         @Override
-        protected SignInResponse doInBackground(Void... params) {
-            Server server = new Server();
-            SignInResponse response = null;
+        protected LoginResponse doInBackground(Void... params) {
+            LoginResponse response = null;
 
             try {
-                response = server.login(txtSignInUserName.getText().toString(),
+                response = Server.login(txtSignInUserName.getText().toString(),
                         txtSignInPassword.getText().toString(),
                         txtSignInKey.getText().toString());
             } catch (Exception e) {
@@ -103,7 +103,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         }
 
         @Override
-        protected void onPostExecute(SignInResponse response) {
+        protected void onPostExecute(LoginResponse response) {
             if (response.isOk()) {
                 LoginToken loginToken = new LoginToken(getActivity());
                 loginToken.saveToken(response.getToken());

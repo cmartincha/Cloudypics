@@ -29,6 +29,13 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     }
 
     @Override
+    public void goToPicturesActivity() {
+        Intent intent = new Intent(this, PicturesActivity.class);
+
+        startActivity(intent);
+    }
+
+    @Override
     public void changeToLoginFragment() {
         changeToFragment(new LoginFragment());
     }
@@ -36,12 +43,6 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     @Override
     public void changeToSignInFragment() {
         changeToFragment(new SignInFragment());
-    }
-
-    @Override
-    public void goToPicturesActivity() {
-        Intent intent = new Intent(this, PicturesActivity.class);
-        startActivity(intent);
     }
 
     protected void changeToFragment(Fragment fragment) {

@@ -15,7 +15,7 @@ public class Server {
     protected static final int READ_TIMEOUT_MS = 5000;
     protected static final int CONNECT_TIMEOUT_MS = 5000;
 
-    public SignInResponse login(String username, String password, String key) throws Exception {
+    public static LoginResponse login(String username, String password, String key) throws Exception {
         String postParameters = "username=" + username + "&password=" + password + "&key=" + key;
         URL url = new URL(SERVER_LOGIN_URL);
 
@@ -46,6 +46,6 @@ public class Server {
 
         reader.close();
 
-        return new SignInResponse(inputBuilder.toString());
+        return new LoginResponse(inputBuilder.toString());
     }
 }
