@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:configChanges="orientation|screenSize"
             android:name=".activity.PicturesActivity"
             android:label="@string/title_activity_pictures">
         </activity>

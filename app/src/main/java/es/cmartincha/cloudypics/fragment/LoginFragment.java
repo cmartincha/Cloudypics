@@ -1,4 +1,4 @@
-package es.cmartincha.cloudypics.activity;
+package es.cmartincha.cloudypics.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import es.cmartincha.cloudypics.R;
+import es.cmartincha.cloudypics.activity.LoginListener;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 

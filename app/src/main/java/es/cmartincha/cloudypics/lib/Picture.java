@@ -10,8 +10,8 @@ import java.util.Date;
 /**
  * Created by Carlos on 07/06/2015.
  */
-public class PictureResponse extends JSONObject {
-    public PictureResponse(String json) throws JSONException {
+public class Picture extends JSONObject {
+    public Picture(String json) throws JSONException {
         super(json);
     }
 

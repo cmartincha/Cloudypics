@@ -1,7 +1,11 @@
 package es.cmartincha.cloudypics.lib;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -18,7 +22,7 @@ public class Server {
     protected static final int READ_TIMEOUT_MS = 5000;
     protected static final int CONNECT_TIMEOUT_MS = 5000;
 
-    public static LoginResponse login(String username, String password, String key) throws Exception {
+    public static Login login(String username, String password, String key) throws Exception {
         String postParameters = "username=" + username + "&password=" + password + "&key=" + key;
         HttpURLConnection connection = setUpConnection(SERVER_LOGIN_URL, "POST", postParameters);
         int statusCode = connection.getResponseCode();
@@ -29,10 +33,10 @@ public class Server {
 
         String response = readResponse(connection);
 
-        return new LoginResponse(response);
+        return new Login(response);
     }
 
-    public static PictureCollectionResponse getPictures(int index) throws Exception {
+    public static PictureCollection getPictures(int index) throws Exception {
         HttpURLConnection connection = setUpConnection(SERVER_PICTURE_COLLECTION_URL, "GET", "index=" + index);
         int statusCode = connection.getResponseCode();
 
@@ -42,7 +46,26 @@ public class Server {
 
         String response = readResponse(connection);
 
-        return new PictureCollectionResponse(response);
+        return new PictureCollection(response);
+    }
+
+    public static Bitmap getPictureBitmap(URL imageUrl) throws Exception {
+        HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+        connection.setDoInput(true);
+
+        int statusCode = connection.getResponseCode();
+
+        if (statusCode != HttpURLConnection.HTTP_OK) {
+            throw new Exception();
+        }
+
+        InputStream inputStream = connection.getInputStream();
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+        inputStream.close();
+        connection.disconnect();
+
+        return bitmap;
     }
 
     private static String readResponse(HttpURLConnection connection) throws IOException {

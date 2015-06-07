@@ -9,8 +9,8 @@ import java.util.ArrayList;
 /**
  * Created by Carlos on 07/06/2015.
  */
-public class PictureCollectionResponse extends JSONObject {
-    public PictureCollectionResponse(String json) throws JSONException {
+public class PictureCollection extends JSONObject {
+    public PictureCollection(String json) throws JSONException {
         super(json);
     }
 
@@ -23,14 +23,14 @@ public class PictureCollectionResponse extends JSONObject {
         return false;
     }
 
-    public ArrayList<PictureResponse> getPicturesArray() {
+    public ArrayList<Picture> getPicturesArray() {
         try {
             JSONArray pictures = getJSONArray("event");
             int length = pictures.length();
-            ArrayList<PictureResponse> picturesArray = new ArrayList<>();
+            ArrayList<Picture> picturesArray = new ArrayList<>();
 
             for (int index = 0; index < length; index++) {
-                picturesArray.add(new PictureResponse(pictures.getString(index)));
+                picturesArray.add(new Picture(pictures.getString(index)));
             }
 
             return picturesArray;

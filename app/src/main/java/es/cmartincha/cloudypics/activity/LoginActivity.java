@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
 import es.cmartincha.cloudypics.R;
+import es.cmartincha.cloudypics.fragment.LoginFragment;
+import es.cmartincha.cloudypics.fragment.SignInFragment;
 import es.cmartincha.cloudypics.lib.UserLogin;
 
 

@@ -12,6 +12,9 @@
         android:id="@+id/gridPictures"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="3" />
+        android:verticalSpacing="10dp"
+        android:columnWidth="100dp"
+        android:stretchMode="columnWidth"
+        android:numColumns="auto_fit" />
 
 </RelativeLayout>

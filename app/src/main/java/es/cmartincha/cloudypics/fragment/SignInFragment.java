@@ -1,4 +1,4 @@
-package es.cmartincha.cloudypics.activity;
+package es.cmartincha.cloudypics.fragment;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -15,7 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import es.cmartincha.cloudypics.R;
-import es.cmartincha.cloudypics.lib.LoginResponse;
+import es.cmartincha.cloudypics.activity.LoginListener;
+import es.cmartincha.cloudypics.lib.Login;
 import es.cmartincha.cloudypics.lib.Server;
 import es.cmartincha.cloudypics.lib.UserLogin;
 
@@ -86,11 +87,11 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         return false;
     }
 
-    private class SignInTask extends AsyncTask<Void, Void, LoginResponse> {
+    private class SignInTask extends AsyncTask<Void, Void, Login> {
 
         @Override
-        protected LoginResponse doInBackground(Void... params) {
-            LoginResponse response = null;
+        protected Login doInBackground(Void... params) {
+            Login response = null;
 
             try {
                 response = Server.login(txtSignInUserName.getText().toString(),
@@ -103,7 +104,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         }
 
         @Override
-        protected void onPostExecute(LoginResponse response) {
+        protected void onPostExecute(Login response) {
             if (response.isOk()) {
                 UserLogin userLogin = new UserLogin(getActivity());
 
