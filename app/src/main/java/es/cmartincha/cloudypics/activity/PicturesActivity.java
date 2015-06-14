@@ -1,15 +1,23 @@
 package es.cmartincha.cloudypics.activity;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.net.URL;
 
 import es.cmartincha.cloudypics.R;
 import es.cmartincha.cloudypics.adapter.GridPicturesAdapter;
@@ -36,6 +44,15 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
         gridPictures.setOnItemClickListener(this);
 
         new PicturesCollectionTask(this).execute();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+
+        inflater.inflate(R.menu.menu_pictures, menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -70,7 +87,7 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
                 .execute(mGridPicturesAdapter.getItem(position));
     }
 
-    private class PictureTask extends AsyncTask<Picture, Void, Bitmap> {
+    private class PictureTask extends AsyncTask<Picture, Void, File> {
         private Activity mActivity;
 
         public PictureTask(Activity activity) {
@@ -78,20 +95,39 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
         }
 
         @Override
-        protected Bitmap doInBackground(Picture... params) {
-            Bitmap bitmap = null;
+        protected File doInBackground(Picture... params) {
+            File picture = null;
 
             try {
-                bitmap = Server.getPictureBitmap(params[0].getUrl());
+                URL pictureUrl = params[0].getUrl();
+                String pictureName = Uri.parse(pictureUrl.toString()).getLastPathSegment();
+                picture = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES), pictureName);
+
+                if (!picture.exists()) {
+                    picture = Server.getPicture(params[0].getUrl(), Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_PICTURES));
+
+                    Log.d("Foto guardada", picture.getAbsolutePath());
+                }
             } catch (Exception ignored) {
             }
 
-            return bitmap;
+            return picture;
         }
 
         @Override
-        protected void onPostExecute(Bitmap bitmap) {
+        protected void onPostExecute(File picture) {
+            if (picture == null) {
+                Toast.makeText(mActivity, "Ooops, algo no ha ido bien", Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                Intent intent = new Intent();
 
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(picture), "image/*");
+                startActivity(intent);
+            }
         }
     }
 
@@ -108,7 +144,7 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
             mLoadingPictures = true;
 
             try {
-                response = Server.getPictures(mPage);
+                response = Server.getPictures(mPage++);
             } catch (Exception ignored) {
             }
 

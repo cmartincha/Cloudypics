@@ -1,8 +1,9 @@
 package es.cmartincha.cloudypics.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.net.URL;
 
 import es.cmartincha.cloudypics.R;
@@ -21,8 +23,12 @@ import es.cmartincha.cloudypics.lib.Server;
  * Created by Carlos on 07/06/2015.
  */
 public class GridPicturesAdapter extends ArrayAdapter<Picture> {
+    Context mContext;
+
     public GridPicturesAdapter(Context context, PictureCollection pictureCollection) {
         super(context, 0, pictureCollection.getPicturesArray());
+
+        mContext = context;
     }
 
     @Override
@@ -56,7 +62,7 @@ public class GridPicturesAdapter extends ArrayAdapter<Picture> {
         public int position;
     }
 
-    private static class ThumbnailTask extends AsyncTask<URL, Void, Bitmap> {
+    private class ThumbnailTask extends AsyncTask<URL, Void, File> {
         private int mPosition;
         private ViewHolder mViewHolder;
 
@@ -66,21 +72,25 @@ public class GridPicturesAdapter extends ArrayAdapter<Picture> {
         }
 
         @Override
-        protected Bitmap doInBackground(URL... params) {
-            Bitmap bitmap = null;
+        protected File doInBackground(URL... params) {
+            File picture = new File(mContext.getFilesDir(), Uri.parse(params[0].toString()).getLastPathSegment());
 
             try {
-                bitmap = Server.getPictureBitmap(params[0]);
+                if (!picture.exists()) {
+                    picture = Server.getPicture(params[0], mContext.getFilesDir());
+
+                    Log.d("Foto mini guardada", picture.getAbsolutePath());
+                }
             } catch (Exception ignored) {
             }
 
-            return bitmap;
+            return picture;
         }
 
         @Override
-        protected void onPostExecute(Bitmap bitmap) {
+        protected void onPostExecute(File bitmap) {
             if (mViewHolder.position == mPosition) {
-                mViewHolder.imgPicture.setImageBitmap(bitmap);
+                mViewHolder.imgPicture.setImageURI(Uri.parse(bitmap.getAbsolutePath()));
             }
         }
     }

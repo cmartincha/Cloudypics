@@ -1,9 +1,10 @@
 package es.cmartincha.cloudypics.lib;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,7 +50,7 @@ public class Server {
         return new PictureCollection(response);
     }
 
-    public static Bitmap getPictureBitmap(URL imageUrl) throws Exception {
+    public static File getPicture(URL imageUrl, File directory) throws Exception {
         HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
         connection.setDoInput(true);
 
@@ -59,13 +60,27 @@ public class Server {
             throw new Exception();
         }
 
-        InputStream inputStream = connection.getInputStream();
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+        File picture = writeFilePicture(imageUrl, directory, connection.getInputStream());
 
-        inputStream.close();
-        connection.disconnect();
+        return picture;
+    }
 
-        return bitmap;
+    private static File writeFilePicture(URL imageUrl, File directory, InputStream in) throws IOException {
+        File picture = new File(directory, Uri.parse(imageUrl.toString()).getLastPathSegment());
+        FileOutputStream out = new FileOutputStream(picture);
+        byte[] buffer = new byte[4 * 1024];
+        int read;
+
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
+
+        out.flush();
+        out.close();
+
+        in.close();
+
+        return picture;
     }
 
     private static String readResponse(HttpURLConnection connection) throws IOException {

@@ -11,4 +11,5 @@
     <string name="sign_in">Registrarse</string>
     <string name="key">Código</string>
     <string name="title_activity_pictures">Fotos</string>
+    <string name="take_photo">Hacer foto</string>
 </resources>
