@@ -1,15 +1,17 @@
 package es.cmartincha.cloudypics.activity;
 
-import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -17,22 +19,29 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.net.URL;
+import java.io.IOException;
 
 import es.cmartincha.cloudypics.R;
 import es.cmartincha.cloudypics.adapter.GridPicturesAdapter;
-import es.cmartincha.cloudypics.lib.Picture;
-import es.cmartincha.cloudypics.lib.PictureCollection;
-import es.cmartincha.cloudypics.lib.Server;
+import es.cmartincha.cloudypics.db.PictureDb;
+import es.cmartincha.cloudypics.db.PictureDbHelper;
+import es.cmartincha.cloudypics.lib.UploadPictureScheduler;
+import es.cmartincha.cloudypics.lib.UserCredentials;
+import es.cmartincha.cloudypics.service.UploadPictureService;
+import es.cmartincha.cloudypics.task.PictureTask;
+import es.cmartincha.cloudypics.task.PicturesCollectionTask;
 
 
 public class PicturesActivity extends AppCompatActivity implements AbsListView.OnScrollListener, AdapterView.OnItemClickListener {
 
-    protected GridView gridPictures;
-    protected int mPage = 0;
-    protected GridPicturesAdapter mGridPicturesAdapter = null;
-    protected boolean mLoadingPictures = false;
-    protected int mPreviousFirstVisibleItem = 0;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    public GridView gridPictures;
+    public int mPage = 0;
+    public GridPicturesAdapter mGridPicturesAdapter = null;
+    public boolean mLoadingPictures = false;
+    public int mPreviousFirstVisibleItem = 0;
+    public String mCurrentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +62,76 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
         inflater.inflate(R.menu.menu_pictures, menu);
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_photo:
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                    try {
+                        File photoFile = createImageFile();
+
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                                Uri.fromFile(photoFile));
+                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                    } catch (IOException ex) {
+                        Toast.makeText(this, "Ooops, algo no ha ido bien", Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = String.valueOf(System.currentTimeMillis());
+        String imageFileName = "cloudypics_" + timeStamp;
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        mCurrentPhotoPath = image.getAbsolutePath();
+
+        return image;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            galleryAddPic();
+
+            //TODO añadir a la base de datos
+            PictureDbHelper pictureDbHelper = new PictureDbHelper(this);
+            SQLiteDatabase db = pictureDbHelper.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(PictureDb.PictureEntry.COLUMN_NAME_PATH, mCurrentPhotoPath);
+
+            long rowId = db.insert(PictureDb.PictureEntry.TABLE_NAME, null, values);
+
+            Log.d("Nueva fila", String.valueOf(rowId));
+
+            //TODO lanzar servicio para subir
+            UploadPictureScheduler.scheduleNewStart(this, UploadPictureService.class, new UserCredentials(this).getToken());
+        }
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+
+        mediaScanIntent.setData(contentUri);
+        sendBroadcast(mediaScanIntent);
     }
 
     @Override
@@ -87,86 +166,4 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
                 .execute(mGridPicturesAdapter.getItem(position));
     }
 
-    private class PictureTask extends AsyncTask<Picture, Void, File> {
-        private Activity mActivity;
-
-        public PictureTask(Activity activity) {
-            mActivity = activity;
-        }
-
-        @Override
-        protected File doInBackground(Picture... params) {
-            File picture = null;
-
-            try {
-                URL pictureUrl = params[0].getUrl();
-                String pictureName = Uri.parse(pictureUrl.toString()).getLastPathSegment();
-                picture = new File(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES), pictureName);
-
-                if (!picture.exists()) {
-                    picture = Server.getPicture(params[0].getUrl(), Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_PICTURES));
-
-                    Log.d("Foto guardada", picture.getAbsolutePath());
-                }
-            } catch (Exception ignored) {
-            }
-
-            return picture;
-        }
-
-        @Override
-        protected void onPostExecute(File picture) {
-            if (picture == null) {
-                Toast.makeText(mActivity, "Ooops, algo no ha ido bien", Toast.LENGTH_SHORT)
-                        .show();
-            } else {
-                Intent intent = new Intent();
-
-                intent.setAction(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.fromFile(picture), "image/*");
-                startActivity(intent);
-            }
-        }
-    }
-
-    private class PicturesCollectionTask extends AsyncTask<Void, Void, PictureCollection> {
-        Activity mActivity;
-
-        public PicturesCollectionTask(Activity activity) {
-            mActivity = activity;
-        }
-
-        @Override
-        protected PictureCollection doInBackground(Void... params) {
-            PictureCollection response = null;
-            mLoadingPictures = true;
-
-            try {
-                response = Server.getPictures(mPage++);
-            } catch (Exception ignored) {
-            }
-
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(PictureCollection response) {
-            if (response.isOk()) {
-                if (mGridPicturesAdapter == null) {
-                    mGridPicturesAdapter = new GridPicturesAdapter(mActivity, response);
-
-                    gridPictures.setAdapter(mGridPicturesAdapter);
-                } else {
-                    mGridPicturesAdapter.addAll(response.getPicturesArray());
-                }
-            } else {
-                Toast.makeText(mActivity, "Ooops, algo no ha ido bien", Toast.LENGTH_SHORT)
-                        .show();
-            }
-
-            mLoadingPictures = false;
-        }
-    }
 }

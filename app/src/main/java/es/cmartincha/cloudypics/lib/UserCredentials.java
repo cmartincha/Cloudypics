@@ -7,15 +7,16 @@ import android.content.SharedPreferences;
 /**
  * Created by Carlos on 07/06/2015.
  */
-public class UserLogin {
+public class UserCredentials {
+    protected static final String PREFERENCES_FILENAME = "cloudy_preferences";
     protected static final String LOGIN_TOKEN = "login_token";
     protected static final String LOGIN_USERNAME = "login_username";
     protected static final String LOGIN_PASSWORD = "login_password";
 
     protected SharedPreferences mSharedPreferences;
 
-    public UserLogin(Activity activity) {
-        mSharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
+    public UserCredentials(Activity activity) {
+        mSharedPreferences = activity.getSharedPreferences(PREFERENCES_FILENAME, Context.MODE_PRIVATE);
     }
 
     public void setToken(String token) {

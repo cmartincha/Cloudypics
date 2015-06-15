@@ -2,8 +2,13 @@ package es.cmartincha.cloudypics.lib;
 
 import android.net.Uri;
 
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +24,7 @@ public class Server {
     protected static final String SERVER_URL = "http://www.albertoymaribel.es/api";
     protected static final String SERVER_LOGIN_URL = SERVER_URL + "/login";
     protected static final String SERVER_PICTURE_COLLECTION_URL = SERVER_URL + "/eventCollection";
+    protected static final String SERVER_PICTURE_UPLOAD_URL = SERVER_URL + "/uploadMedia";
 
     protected static final int READ_TIMEOUT_MS = 5000;
     protected static final int CONNECT_TIMEOUT_MS = 5000;
@@ -122,5 +128,73 @@ public class Server {
         }
 
         return connection;
+    }
+
+    private static HttpURLConnection setUpUploadConnection(String urlString, File picture, String token) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) (new URL(urlString).openConnection());
+        connection.setReadTimeout(READ_TIMEOUT_MS);
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setRequestMethod("POST");
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
+
+        connection.setRequestProperty("token", token);
+        connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=1234abcd");
+
+        DataOutputStream request = new DataOutputStream(connection.getOutputStream());
+
+        request.writeBytes("--1234abcd\r\n");
+        request.writeBytes("Content-Disposition: form-data; name=\"type\"\r\n");
+        request.writeBytes("\r\n");
+        request.writeBytes("jpg");
+        request.writeBytes("\r\n");
+
+        request.writeBytes("--1234abcd\r\n");
+        request.writeBytes("Content-Disposition: form-data; name=\"filename\"\r\n");
+        request.writeBytes("\r\n");
+        request.writeBytes(picture.getName());
+        request.writeBytes("\r\n");
+
+        request.writeBytes("--1234abcd\r\n");
+        request.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + picture.getName() + "\"\r\n");
+        request.writeBytes("Content-Type: image/jpg\r\n");
+        request.writeBytes("\r\n");
+
+        byte[] bytes = readFileBytes(picture);
+
+        request.write(bytes);
+        request.writeBytes("\r\n");
+
+        request.writeBytes("--1234abcd--\r\n");
+
+        request.flush();
+        request.close();
+
+        return connection;
+    }
+
+    private static byte[] readFileBytes(File picture) throws IOException {
+        byte[] bytes = new byte[(int) picture.length()];
+        BufferedInputStream buf = new BufferedInputStream(new FileInputStream(picture));
+
+        buf.read(bytes, 0, bytes.length);
+        buf.close();
+
+        return bytes;
+    }
+
+    public static void uploadPicture(File picture, String token) throws Exception {
+        HttpURLConnection connection = setUpUploadConnection(SERVER_PICTURE_UPLOAD_URL, picture, token);
+        int statusCode = connection.getResponseCode();
+
+        if (statusCode != HttpURLConnection.HTTP_OK) {
+            throw new Exception();
+        }
+
+        JSONObject response = new JSONObject(readResponse(connection));
+
+        if (!response.getBoolean("success")) {
+            throw new Exception();
+        }
     }
 }
