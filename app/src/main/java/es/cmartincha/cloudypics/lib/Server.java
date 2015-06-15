@@ -29,7 +29,7 @@ public class Server {
     protected static final int READ_TIMEOUT_MS = 5000;
     protected static final int CONNECT_TIMEOUT_MS = 5000;
 
-    public static Login login(String username, String password, String key) throws Exception {
+    public static JSONObject login(String username, String password, String key) throws Exception {
         String postParameters = "username=" + username + "&password=" + password + "&key=" + key;
         HttpURLConnection connection = setUpConnection(SERVER_LOGIN_URL, "POST", postParameters);
         int statusCode = connection.getResponseCode();
@@ -40,7 +40,7 @@ public class Server {
 
         String response = readResponse(connection);
 
-        return new Login(response);
+        return new JSONObject(response);
     }
 
     public static PictureCollection getPictures(int index) throws Exception {
@@ -53,7 +53,7 @@ public class Server {
 
         String response = readResponse(connection);
 
-        return new PictureCollection(response);
+        return PictureCollection.fromJSON(response);
     }
 
     public static File getPicture(URL imageUrl, File directory) throws Exception {

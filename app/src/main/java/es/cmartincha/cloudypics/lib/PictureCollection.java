@@ -9,34 +9,41 @@ import java.util.ArrayList;
 /**
  * Created by Carlos on 07/06/2015.
  */
-public class PictureCollection extends JSONObject {
-    public PictureCollection(String json) throws JSONException {
-        super(json);
-    }
+public class PictureCollection {
+    ArrayList<Picture> mPicturesArray = new ArrayList<>();
+    boolean mSuccess = false;
 
-    public boolean isOk() {
+    public static PictureCollection fromJSON(String json) {
+        PictureCollection pictureCollection = new PictureCollection();
+
         try {
-            return getBoolean("success");
-        } catch (JSONException e) {
-        }
+            JSONObject jsonObject = new JSONObject(json);
+            pictureCollection.mSuccess = jsonObject.getBoolean("success");
 
-        return false;
-    }
-
-    public ArrayList<Picture> getPicturesArray() {
-        try {
-            JSONArray pictures = getJSONArray("event");
+            JSONArray pictures = jsonObject.getJSONArray("event");
             int length = pictures.length();
-            ArrayList<Picture> picturesArray = new ArrayList<>();
 
             for (int index = 0; index < length; index++) {
-                picturesArray.add(new Picture(pictures.getString(index)));
+                pictureCollection.mPicturesArray.add(Picture.fromJSON(pictures.getString(index)));
             }
-
-            return picturesArray;
         } catch (JSONException ignored) {
         }
 
-        return null;
+        return pictureCollection;
+    }
+
+    public PictureCollection() {
+    }
+
+    public boolean isOk() {
+        return mSuccess;
+    }
+
+    public ArrayList<Picture> getPicturesArray() {
+        return mPicturesArray;
+    }
+
+    public void setPicturesArray(ArrayList<Picture> mPicturesArray) {
+        this.mPicturesArray = mPicturesArray;
     }
 }

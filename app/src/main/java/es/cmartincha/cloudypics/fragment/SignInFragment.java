@@ -14,9 +14,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import es.cmartincha.cloudypics.R;
 import es.cmartincha.cloudypics.activity.LoginListener;
-import es.cmartincha.cloudypics.lib.Login;
 import es.cmartincha.cloudypics.lib.Server;
 import es.cmartincha.cloudypics.lib.UserCredentials;
 
@@ -87,11 +89,11 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         return false;
     }
 
-    private class SignInTask extends AsyncTask<Void, Void, Login> {
+    private class SignInTask extends AsyncTask<Void, Void, JSONObject> {
 
         @Override
-        protected Login doInBackground(Void... params) {
-            Login response = null;
+        protected JSONObject doInBackground(Void... params) {
+            JSONObject response = null;
 
             try {
                 response = Server.login(txtSignInUserName.getText().toString(),
@@ -104,16 +106,21 @@ public class SignInFragment extends Fragment implements View.OnClickListener, Te
         }
 
         @Override
-        protected void onPostExecute(Login response) {
-            if (response.isOk()) {
-                UserCredentials userCredentials = new UserCredentials(getActivity());
+        protected void onPostExecute(JSONObject response) {
+            try {
+                if (response.getBoolean("success")) {
+                    UserCredentials userCredentials = new UserCredentials(getActivity());
 
-                userCredentials.setToken(response.getToken());
-                userCredentials.setUserName(txtSignInUserName.getText().toString());
-                userCredentials.setPassword(txtSignInPassword.getText().toString());
+                    userCredentials.setToken(response.getString("token"));
+                    userCredentials.setUserName(txtSignInUserName.getText().toString());
+                    userCredentials.setPassword(txtSignInPassword.getText().toString());
 
-                mLoginListener.goToPicturesActivity();
-            } else {
+                    mLoginListener.goToPicturesActivity();
+                } else {
+                    Toast.makeText(getActivity(), "Ooops, algo no ha ido bien", Toast.LENGTH_SHORT)
+                            .show();
+                }
+            } catch (JSONException e) {
                 Toast.makeText(getActivity(), "Ooops, algo no ha ido bien", Toast.LENGTH_SHORT)
                         .show();
             }

@@ -10,48 +10,60 @@ import java.util.Date;
 /**
  * Created by Carlos on 07/06/2015.
  */
-public class Picture extends JSONObject {
-    public Picture(String json) throws JSONException {
-        super(json);
-    }
+public class Picture {
+    String mUsername = "";
+    Date mDate = null;
+    URL mUrl = null;
+    URL mThumbnail = null;
 
-    public String getType() {
+    public static Picture fromJSON(String json) {
+        Picture picture = new Picture();
+
         try {
-            return getString("type");
-        } catch (JSONException ignored) {
+            JSONObject jsonObject = new JSONObject(json);
+
+            picture.mUsername = jsonObject.getString("username");
+            picture.mDate = null;
+            picture.mUrl = new URL(jsonObject.getString("url"));
+            picture.mThumbnail = new URL(jsonObject.getString("thumbnail"));
+        } catch (JSONException | MalformedURLException ignored) {
         }
 
-        return null;
+        return picture;
     }
 
     public String getUsername() {
-        try {
-            return getString("username");
-        } catch (JSONException ignored) {
-        }
+        return mUsername;
+    }
 
-        return null;
+    public void setUsername(String mUsername) {
+        this.mUsername = mUsername;
     }
 
     public Date getDate() {
-        return null;
+        return mDate;
+    }
+
+    public void setDate(Date mDate) {
+        this.mDate = mDate;
     }
 
     public URL getUrl() {
-        try {
-            return new URL(getString("url"));
-        } catch (MalformedURLException | JSONException ignored) {
-        }
+        return mUrl;
+    }
 
-        return null;
+    public void setUrl(URL mUrl) {
+        this.mUrl = mUrl;
     }
 
     public URL getThumbnail() {
-        try {
-            return new URL(getString("thumbnail"));
-        } catch (MalformedURLException | JSONException ignored) {
-        }
+        return mThumbnail;
+    }
 
-        return null;
+    public void setThumbnail(URL mThumnail) {
+        this.mThumbnail = mThumnail;
+    }
+
+    public Picture() {
     }
 }
