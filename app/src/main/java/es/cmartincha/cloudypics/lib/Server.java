@@ -31,7 +31,7 @@ public class Server {
 
     public static JSONObject login(String username, String password, String key) throws Exception {
         String postParameters = "username=" + username + "&password=" + password + "&key=" + key;
-        HttpURLConnection connection = setUpConnection(SERVER_LOGIN_URL, "POST", postParameters);
+        HttpURLConnection connection = setUpConnection(SERVER_LOGIN_URL, "POST", postParameters, null);
         int statusCode = connection.getResponseCode();
 
         if (statusCode != HttpURLConnection.HTTP_OK) {
@@ -39,12 +39,13 @@ public class Server {
         }
 
         String response = readResponse(connection);
+        connection.disconnect();
 
         return new JSONObject(response);
     }
 
-    public static PictureCollection getPictures(int index) throws Exception {
-        HttpURLConnection connection = setUpConnection(SERVER_PICTURE_COLLECTION_URL, "GET", "index=" + index);
+    public static PictureCollection getPictures(int index, String token) throws Exception {
+        HttpURLConnection connection = setUpConnection(SERVER_PICTURE_COLLECTION_URL, "GET", "index=" + index, token);
         int statusCode = connection.getResponseCode();
 
         if (statusCode != HttpURLConnection.HTTP_OK) {
@@ -52,6 +53,7 @@ public class Server {
         }
 
         String response = readResponse(connection);
+        connection.disconnect();
 
         return PictureCollection.fromJSON(response);
     }
@@ -99,12 +101,11 @@ public class Server {
         }
 
         reader.close();
-        connection.disconnect();
 
         return inputBuilder.toString();
     }
 
-    private static HttpURLConnection setUpConnection(String urlString, String requestMethod, String requestParameters) throws IOException {
+    private static HttpURLConnection setUpConnection(String urlString, String requestMethod, String requestParameters, String token) throws IOException {
         URL url;
 
         if (requestMethod.equals("GET") && requestParameters != null) {
@@ -118,6 +119,10 @@ public class Server {
         connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
         connection.setRequestMethod(requestMethod);
         connection.setDoInput(true);
+
+        if (token != null) {
+            connection.setRequestProperty("token", token);
+        }
 
         if (requestMethod.equals("POST") && requestParameters != null) {
             connection.setDoOutput(true);
@@ -192,6 +197,7 @@ public class Server {
         }
 
         JSONObject response = new JSONObject(readResponse(connection));
+        connection.disconnect();
 
         if (!response.getBoolean("success")) {
             throw new Exception();

@@ -26,6 +26,13 @@ public class UserCredentials {
         editor.apply();
     }
 
+    public void removeToken() {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+
+        editor.remove(LOGIN_TOKEN);
+        editor.apply();
+    }
+
     public String getToken() {
         return mSharedPreferences.getString(LOGIN_TOKEN, null);
     }

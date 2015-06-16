@@ -52,7 +52,7 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
         gridPictures.setOnScrollListener(this);
         gridPictures.setOnItemClickListener(this);
 
-        new PicturesCollectionTask(this).execute();
+        new PicturesCollectionTask(this, new UserCredentials(this).getToken()).execute();
     }
 
     @Override
@@ -82,6 +82,12 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
                                 .show();
                     }
                 }
+                return true;
+            case R.id.action_logout:
+                new UserCredentials(this).removeToken();
+                Intent intent = new Intent(this, LoginActivity.class);
+
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -117,6 +123,8 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
             values.put(PictureDb.PictureEntry.COLUMN_NAME_PATH, mCurrentPhotoPath);
 
             long rowId = db.insert(PictureDb.PictureEntry.TABLE_NAME, null, values);
+
+            db.close();
 
             Log.d("Nueva fila", String.valueOf(rowId));
 
@@ -156,7 +164,7 @@ public class PicturesActivity extends AppCompatActivity implements AbsListView.O
             mPage++;
             mPreviousFirstVisibleItem = firstVisibleItem;
 
-            new PicturesCollectionTask(this).execute();
+            new PicturesCollectionTask(this, new UserCredentials(this).getToken()).execute();
         }
     }
 

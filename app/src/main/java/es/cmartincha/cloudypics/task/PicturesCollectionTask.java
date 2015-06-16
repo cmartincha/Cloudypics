@@ -13,9 +13,11 @@ import es.cmartincha.cloudypics.lib.Server;
  */
 public class PicturesCollectionTask extends AsyncTask<Void, Void, PictureCollection> {
     private PicturesActivity mPicturesActivity;
+    private String mToken;
 
-    public PicturesCollectionTask(PicturesActivity picturesActivity) {
+    public PicturesCollectionTask(PicturesActivity picturesActivity, String token) {
         mPicturesActivity = picturesActivity;
+        mToken = token;
     }
 
     @Override
@@ -24,7 +26,7 @@ public class PicturesCollectionTask extends AsyncTask<Void, Void, PictureCollect
         mPicturesActivity.mLoadingPictures = true;
 
         try {
-            response = Server.getPictures(mPicturesActivity.mPage++);
+            response = Server.getPictures(mPicturesActivity.mPage++, mToken);
         } catch (Exception ignored) {
         }
 

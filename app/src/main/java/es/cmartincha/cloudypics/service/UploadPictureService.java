@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import java.io.File;
 
@@ -27,6 +28,7 @@ public class UploadPictureService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d("Subo foto", "");
         mToken = intent.getStringExtra("token");
 
         if (!connectionReady()) {
@@ -66,7 +68,9 @@ public class UploadPictureService extends IntentService {
                 cursor.moveToNext();
             }
         }
+
         cursor.close();
+        db.close();
     }
 
     private boolean connectionReady() {

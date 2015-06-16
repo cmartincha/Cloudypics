@@ -8,4 +8,10 @@
         android:title="@string/take_photo"
         android:icon="@drawable/ic_photo_camera_black_48dp"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/logout"
+        android:icon="@drawable/ic_exit_to_app_black_48dp"
+        app:showAsAction="collapseActionView" />
 </menu>
